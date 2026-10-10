@@ -99,10 +99,10 @@ before a demo**. Re-seeding only replaces the `@foodrescue.demo` accounts and th
 
 The free Render plan sleeps after inactivity; the first request can take ~30-50 seconds.
 
-### Frontend → Vercel
+### Frontend → Render Static Site (or Vercel / Netlify)
 1. In `frontend/js/config.js`, set `PROD_API_BASE` to `https://<your-service>.onrender.com/api`.
-2. New Vercel project from the same repo. **Root directory:** `frontend`. Framework preset: **Other**, no build command.
-3. Deploy, then put the Vercel URL into Render's `CLIENT_ORIGIN` and redeploy the backend.
+2. Render → New → **Static Site** from the same repo. **Root directory:** `frontend`, build command empty, publish directory `.` (Vercel/Netlify work the same way).
+3. Deploy, then put the static site URL into the backend's `CLIENT_ORIGIN` and save (the backend restarts).
 
 ## API summary
 
