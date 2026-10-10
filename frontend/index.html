@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rescue Food. Share Hope. · FoodRescue</title>
+  <meta name="description" content="FoodRescue connects surplus food donors with distributors in Bangalore.">
+  <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg landing-nav sticky-top">
+  <div class="container">
+    <a class="brand" href="/"><img src="/img/logo.svg" width="28" height="28" alt="">FoodRescue</a>
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-label="Menu"><span class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav mx-auto gap-lg-3">
+        <li class="nav-item"><a class="nav-link" href="#top">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+        <li class="nav-item"><a class="nav-link" href="#how">How It Works</a></li>
+        <li class="nav-item"><a class="nav-link" href="#impact">Impact</a></li>
+        <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+      </ul>
+      <div class="d-flex gap-2 py-2 py-lg-0" id="navAuth">
+        <a href="/login.html" class="btn btn-outline-primary px-4">Login</a>
+        <a href="/signup.html" class="btn btn-primary px-4">Sign Up</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <span class="hero-pill mb-3">Surplus Food &nbsp;•&nbsp; Stronger Communities</span>
+        <h1 class="mb-3">Rescue Food.<br>Share Hope.</h1>
+        <p class="lead text-muted mb-4">Connecting surplus food with people who can make a difference. Let's reduce food waste and fight hunger together in Bangalore.</p>
+        <div class="d-flex flex-wrap gap-3 mb-5">
+          <a href="/signup.html?role=donor" class="btn btn-primary btn-lg" id="ctaDonate">Donate Food</a>
+          <a href="/signup.html?role=distributor" class="btn btn-outline-primary btn-lg" id="ctaFind">Find Food</a>
+        </div>
+        <div class="row g-3" id="heroStats">
+          <div class="col-6 col-md-3 impact-stat"><span class="stat-icon icon-green"><i class="bi bi-basket2"></i></span><div><div class="num" data-stat="mealsRescued">–</div><div class="lbl">Meals Rescued</div></div></div>
+          <div class="col-6 col-md-3 impact-stat"><span class="stat-icon icon-orange"><i class="bi bi-people"></i></span><div><div class="num" data-stat="activeDonors">–</div><div class="lbl">Active Donors</div></div></div>
+          <div class="col-6 col-md-3 impact-stat"><span class="stat-icon icon-green"><i class="bi bi-truck"></i></span><div><div class="num" data-stat="pickupsCompleted">–</div><div class="lbl">Pickups Done</div></div></div>
+          <div class="col-6 col-md-3 impact-stat"><span class="stat-icon icon-red"><i class="bi bi-heart"></i></span><div><div class="num" data-stat="distributors">–</div><div class="lbl">Volunteer Groups</div></div></div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="hero-img-wrap">
+          <img class="hero-img" src="https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=1100&q=75&auto=format&fit=crop" alt="Indian thali meal with chapati, curries and rice">
+          <div class="hero-note d-none d-sm-block">Good Food<br>Better<br>Tomorrows</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="section bg-cream" id="how">
+  <div class="container text-center">
+    <h2 class="mb-2">How FoodRescue Works</h2>
+    <p class="text-muted mb-5">A simple way to connect surplus food with people who need it.</p>
+    <div class="row g-4">
+      <div class="col-sm-6 col-lg-3"><div class="step-icon" style="background:#ee8a2a"><i class="bi bi-egg-fried"></i></div><h3 class="h5 fw-semibold">List Surplus Food</h3><p class="text-muted small">Hostels, restaurants, caterers or individuals post available food with details and a photo.</p></div>
+      <div class="col-sm-6 col-lg-3"><div class="step-icon" style="background:#1e6b3a"><i class="bi bi-search"></i></div><h3 class="h5 fw-semibold">Find &amp; Claim</h3><p class="text-muted small">Distributors and volunteer groups browse nearby listings by area and claim a pickup.</p></div>
+      <div class="col-sm-6 col-lg-3"><div class="step-icon" style="background:#2f6fd1"><i class="bi bi-truck"></i></div><h3 class="h5 fw-semibold">Collect Food</h3><p class="text-muted small">Coordinate pickup with the donor before the deadline and collect the food.</p></div>
+      <div class="col-sm-6 col-lg-3"><div class="step-icon" style="background:#d64545"><i class="bi bi-people-fill"></i></div><h3 class="h5 fw-semibold">Distribute</h3><p class="text-muted small">Share the food with communities in need and rate the pickup to build trust.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="impact">
+  <div class="container">
+    <div class="impact-band p-4 p-md-5 text-center">
+      <h2 class="h3 mb-4"><span class="text-green">Fresh Food.</span> Real Impact.</h2>
+      <div class="row g-4 justify-content-center">
+        <div class="col-6 col-md-3"><div class="stat-value text-green" data-stat="mealsRescued">–</div><div class="stat-label">Meals rescued</div></div>
+        <div class="col-6 col-md-3"><div class="stat-value text-orange" data-stat="platesAvailableNow">–</div><div class="stat-label">Plates available right now</div></div>
+        <div class="col-6 col-md-3"><div class="stat-value text-green" data-stat="activeDonors">–</div><div class="stat-label">Donors</div></div>
+        <div class="col-6 col-md-3"><div class="stat-value text-orange" data-stat="distributors">–</div><div class="stat-label">Distributor groups</div></div>
+      </div>
+      <p class="small text-muted mt-4 mb-0">Live numbers from the FoodRescue database.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section bg-cream" id="about">
+  <div class="container">
+    <div class="row g-5 align-items-center">
+      <div class="col-lg-6">
+        <h2 class="mb-3">About FoodRescue</h2>
+        <p class="text-muted">Every day, hostels, restaurants and event caterers in Bangalore cook more than they serve. FoodRescue gives that surplus a short, safe path to people who need it.</p>
+        <ul class="list-unstyled text-muted">
+          <li class="mb-2"><i class="bi bi-check-circle-fill text-green me-2"></i><b>Donors</b> post surplus food with quantity, food type, area and a pickup deadline.</li>
+          <li class="mb-2"><i class="bi bi-check-circle-fill text-green me-2"></i><b>Distributors</b> filter by area, price and food type, then claim and collect.</li>
+          <li class="mb-2"><i class="bi bi-check-circle-fill text-green me-2"></i>Food is free or nominally priced: <b>Free, ₹5 or ₹10 per plate</b>, never more.</li>
+          <li><i class="bi bi-check-circle-fill text-green me-2"></i>An admin team moderates listings and handles reports.</li>
+        </ul>
+      </div>
+      <div class="col-lg-6">
+        <div class="row g-3">
+          <div class="col-6"><img class="w-100 rounded-4" style="aspect-ratio:1;object-fit:cover" src="https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=600&q=70&auto=format&fit=crop" alt="Vegetable biryani"></div>
+          <div class="col-6"><img class="w-100 rounded-4" style="aspect-ratio:1;object-fit:cover" src="https://images.unsplash.com/photo-1606491956689-2ea866880c84?w=600&q=70&auto=format&fit=crop" alt="Pav bhaji"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer py-5" id="contact">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-md-5">
+        <div class="brand text-white mb-2"><img src="/img/logo.svg" width="26" height="26" alt="" style="filter:brightness(0) invert(1)">FoodRescue</div>
+        <p class="small mb-0">Surplus Food Redistribution &amp; Demand Coordination Platform, Bangalore.</p>
+      </div>
+      <div class="col-md-4">
+        <h3 class="h6 text-white">Contact</h3>
+        <p class="small mb-1"><i class="bi bi-envelope me-2"></i>hello@foodrescue.example</p>
+        <p class="small mb-0"><i class="bi bi-geo-alt me-2"></i>Bangalore, Karnataka</p>
+      </div>
+      <div class="col-md-3">
+        <h3 class="h6 text-white">Get started</h3>
+        <a class="d-block small mb-1" href="/signup.html?role=donor">Donate food</a>
+        <a class="d-block small" href="/signup.html?role=distributor">Become a distributor</a>
+      </div>
+    </div>
+    <hr class="border-light opacity-25">
+    <p class="small mb-0 opacity-75">© <span id="year"></span> FoodRescue · College full-stack project</p>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/app.js"></script>
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // Logged-in users get a "Go to dashboard" button instead of Login / Sign Up.
+  const user = Auth.user;
+  if (user && Auth.token) {
+    document.getElementById('navAuth').innerHTML = `<a href="${HOME[user.role]}" class="btn btn-primary px-4">Go to Dashboard</a>`;
+    if (user.role === 'donor') document.getElementById('ctaDonate').href = '/donor/add-listing.html';
+    if (user.role === 'distributor') document.getElementById('ctaFind').href = '/distributor/marketplace.html';
+  }
+
+  // Real impact numbers from the database.
+  api('/stats/public').then((s) => {
+    document.querySelectorAll('[data-stat]').forEach((el) => { el.textContent = fmtNum(s[el.dataset.stat]); });
+  }).catch(() => {
+    document.querySelectorAll('[data-stat]').forEach((el) => { el.textContent = '–'; });
+  });
+</script>
+</body>
+</html>

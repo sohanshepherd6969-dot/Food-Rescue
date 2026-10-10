@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Pickups · FoodRescue</title>
+  <meta name="description" content="FoodRescue connects surplus food donors with distributors in Bangalore.">
+  <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+<div class="app-layout">
+  <aside class="app-sidebar" id="sidebar"></aside>
+  <main class="app-main">
+    <div class="page-head"><div><h1>My Pickups</h1><p class="text-muted mb-0">Food you claimed. Mark it collected after pickup, then rate the donor.</p></div></div>
+    <ul class="nav fr-tabs gap-1 mb-3" id="tabs"></ul>
+    <div id="list"></div>
+  </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/app.js"></script>
+<script src="/js/layout.js"></script>
+<script src="/js/pickups.js"></script>
+<script>
+  requireRole('distributor');
+  renderLayout('pickups');
+  pickupsPage('/claims/mine', 'distributor');
+</script>
+</body>
+</html>

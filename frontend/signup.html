@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign Up · FoodRescue</title>
+  <meta name="description" content="FoodRescue connects surplus food donors with distributors in Bangalore.">
+  <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+<div class="auth-wrap">
+  <div class="fr-card auth-card wide">
+    <div class="text-center mb-3"><a class="brand fs-3" href="/"><img src="/img/logo.svg" width="32" height="32" alt="">FoodRescue</a></div>
+
+    <div class="stepper" id="stepper">
+      <div class="step active" data-step="1"><span class="dot">1</span>Role</div><span class="line"></span>
+      <div class="step" data-step="2"><span class="dot">2</span>Details</div><span class="line"></span>
+      <div class="step" data-step="3"><span class="dot">3</span>Complete</div>
+    </div>
+
+    <!-- Step 1: role -->
+    <section id="step1">
+      <h1 class="h4 mb-1">Create Your Account</h1>
+      <p class="text-muted mb-4">Choose how you want to use FoodRescue</p>
+      <div class="row g-3 mb-4">
+        <div class="col-md-4"><div class="role-card" data-role="donor" tabindex="0" role="button">
+          <i class="bi bi-check-circle-fill check"></i>
+          <div class="role-icon icon-green"><i class="bi bi-basket2-fill"></i></div>
+          <div class="fw-semibold">Donor</div><div class="small text-muted">I have surplus food to donate</div></div></div>
+        <div class="col-md-4"><div class="role-card" data-role="distributor" tabindex="0" role="button">
+          <i class="bi bi-check-circle-fill check"></i>
+          <div class="role-icon icon-blue"><i class="bi bi-truck"></i></div>
+          <div class="fw-semibold">Distributor</div><div class="small text-muted">I want to collect and distribute food</div></div></div>
+        <div class="col-md-4"><div class="role-card disabled" title="Admin accounts are created by the platform, not by sign-up">
+          <div class="role-icon icon-green"><i class="bi bi-shield-check"></i></div>
+          <div class="fw-semibold">Super Admin</div><div class="small text-muted">Platform administration<br><i>(by invitation only)</i></div></div></div>
+      </div>
+      <button class="btn btn-primary w-100 py-2" id="toStep2" disabled>Next</button>
+      <p class="text-center small text-muted mt-3 mb-0">Already have an account? <a href="/login.html">Login</a></p>
+    </section>
+
+    <!-- Step 2: details -->
+    <section id="step2" class="d-none">
+      <h1 class="h4 mb-1">Your Details</h1>
+      <p class="text-muted mb-4">Signing up as a <b id="roleLabel"></b></p>
+      <form id="signupForm" novalidate>
+        <div class="row g-3">
+          <div class="col-md-6"><label class="form-label required" for="name">Full name</label><input class="form-control" id="name" required maxlength="80"></div>
+          <div class="col-md-6"><label class="form-label" for="org" id="orgLabel">Organization name</label><input class="form-control" id="org" maxlength="120"></div>
+          <div class="col-md-6"><label class="form-label required" for="email">Email</label><input type="email" class="form-control" id="email" required placeholder="you@example.com"></div>
+          <div class="col-md-6"><label class="form-label" for="phone">Phone</label><input class="form-control" id="phone" maxlength="15" placeholder="10-digit mobile"></div>
+          <div class="col-md-6"><label class="form-label" for="area">Area (Bangalore)</label><select class="form-select" id="area"></select></div>
+          <div class="col-md-6"><label class="form-label required" for="password">Password</label><input type="password" class="form-control" id="password" required minlength="6" placeholder="At least 6 characters"></div>
+        </div>
+        <div class="alert alert-danger py-2 small mt-3 d-none" id="error"></div>
+        <div class="d-flex gap-2 mt-4">
+          <button type="button" class="btn btn-light px-4" id="back">Back</button>
+          <button type="submit" class="btn btn-primary flex-grow-1 py-2">Create Account</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Step 3: done -->
+    <section id="step3" class="d-none text-center py-3">
+      <div class="stat-icon icon-green mx-auto mb-3" style="width:64px;height:64px;font-size:2rem"><i class="bi bi-check-lg"></i></div>
+      <h1 class="h4">Account created!</h1>
+      <p class="text-muted" id="doneText"></p>
+      <a class="btn btn-primary px-5" id="goDash">Go to Dashboard</a>
+    </section>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/app.js"></script>
+<script>
+  const AREAS = ['All Bangalore', 'Koramangala', 'Indiranagar', 'Jayanagar', 'Whitefield'];
+  document.getElementById('area').innerHTML = AREAS.map((a) => `<option>${a}</option>`).join('');
+
+  let role = null;
+  const cards = document.querySelectorAll('.role-card[data-role]');
+  function pick(r) {
+    role = r;
+    cards.forEach((c) => c.classList.toggle('selected', c.dataset.role === r));
+    document.getElementById('toStep2').disabled = false;
+  }
+  cards.forEach((c) => {
+    c.onclick = () => pick(c.dataset.role);
+    c.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(c.dataset.role); } };
+  });
+  if (['donor', 'distributor'].includes(qs('role'))) pick(qs('role'));
+
+  function goStep(n) {
+    [1, 2, 3].forEach((i) => document.getElementById('step' + i).classList.toggle('d-none', i !== n));
+    document.querySelectorAll('#stepper .step').forEach((s) => {
+      const i = Number(s.dataset.step);
+      s.classList.toggle('active', i === n);
+      s.classList.toggle('done', i < n);
+    });
+  }
+
+  document.getElementById('toStep2').onclick = () => {
+    document.getElementById('roleLabel').textContent = role === 'donor' ? 'Donor' : 'Distributor';
+    document.getElementById('orgLabel').textContent = role === 'donor' ? 'Hostel / restaurant / organization' : 'NGO / volunteer group';
+    goStep(2);
+  };
+  document.getElementById('back').onclick = () => goStep(1);
+
+  document.getElementById('signupForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const err = document.getElementById('error');
+    err.classList.add('d-none');
+    const v = (id) => document.getElementById(id).value.trim();
+    const body = { role, name: v('name'), organizationName: v('org'), email: v('email'), phone: v('phone'), area: v('area'), password: document.getElementById('password').value };
+
+    const problem = !body.name ? 'Enter your name.'
+      : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email) ? 'Enter a valid email address.'
+      : body.password.length < 6 ? 'Password must be at least 6 characters.'
+      : body.phone && !/^[0-9+\-\s]{7,15}$/.test(body.phone) ? 'Enter a valid phone number.' : '';
+    if (problem) { err.textContent = problem; err.classList.remove('d-none'); return; }
+
+    await withBusy(e.submitter, async () => {
+      try {
+        const { token, user } = await api('/auth/register', { method: 'POST', body });
+        Auth.save(token, user, true);
+        document.getElementById('doneText').textContent = role === 'donor'
+          ? 'You can now post surplus food for distributors to collect.'
+          : 'You can now browse available food across Bangalore and claim pickups.';
+        document.getElementById('goDash').href = HOME[user.role];
+        goStep(3);
+      } catch (ex) {
+        err.textContent = ex.message;
+        err.classList.remove('d-none');
+      }
+    });
+  };
+</script>
+</body>
+</html>

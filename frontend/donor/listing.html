@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Listing Details · FoodRescue</title>
+  <meta name="description" content="FoodRescue connects surplus food donors with distributors in Bangalore.">
+  <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+<div class="app-layout">
+  <aside class="app-sidebar" id="sidebar"></aside>
+  <main class="app-main">
+    <a href="/donor/listings.html" class="small text-decoration-none"><i class="bi bi-arrow-left"></i> My Listings</a>
+    <div id="content" class="mt-2"></div>
+  </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/app.js"></script>
+<script src="/js/layout.js"></script>
+<script src="/js/pickups.js"></script>
+<script>
+  requireRole('donor');
+  renderLayout('listings');
+  const id = qs('id');
+  const content = document.getElementById('content');
+
+  function load() {
+    content.innerHTML = loadingState();
+    api('/listings/' + id).then(({ listing: l }) => {
+      const editable = l.status === 'available';
+      const claims = (l.claims || []).map((c) => ({ ...c, listingId: l }));
+      content.innerHTML = `
+        <div class="row g-4">
+          <div class="col-lg-5">${imgTag(l.imageUrl, 'w-100 rounded-4 shadow-sm', l.title).replace('<img', '<img style="aspect-ratio:4/3;object-fit:cover"')}</div>
+          <div class="col-lg-7">
+            <div class="d-flex justify-content-between flex-wrap gap-2 align-items-start">
+              <h1 class="h3 mb-1">${esc(l.title)}</h1>${statusBadge(l.status, l)}
+            </div>
+            <div class="d-flex flex-wrap gap-1 mb-3">${typeBadges(l)}</div>
+            <div class="row g-3 mb-3">
+              <div class="col-6 col-md-3"><div class="stat-label">Quantity</div><div class="fw-semibold">${l.quantityPlates} plates</div></div>
+              <div class="col-6 col-md-3"><div class="stat-label">Price</div><div class="fw-semibold">${fmtPrice(l.pricePerPlate)}</div></div>
+              <div class="col-6 col-md-3"><div class="stat-label">Area</div><div class="fw-semibold">${esc(l.area)}</div></div>
+              <div class="col-6 col-md-3"><div class="stat-label">Pickup by</div><div class="fw-semibold">${fmtDate(l.pickupDeadline)}</div></div>
+            </div>
+            <p class="text-muted">${esc(l.description) || '<i>No description</i>'}</p>
+            <div class="small text-muted mb-3">Posted ${fmtDate(l.createdAt)}</div>
+            ${editable ? `<div class="d-flex gap-2">
+              <a href="/donor/add-listing.html?id=${l._id}" class="btn btn-outline-primary"><i class="bi bi-pencil me-1"></i>Edit</a>
+              <button class="btn btn-outline-danger" id="cancelListing"><i class="bi bi-x-circle me-1"></i>Cancel Listing</button></div>` : ''}
+          </div>
+        </div>
+        <h2 class="section-title mt-5 mb-3">Pickup status</h2>
+        <div id="claims">${claims.length ? claims.map((c) => claimCard(c, 'donor')).join('')
+          : `<div class="fr-card p-3 text-muted">${l.status === 'available' ? 'Waiting for a distributor to claim this food.' : 'No pickups.'}</div>`}</div>`;
+
+      const cancelBtn = document.getElementById('cancelListing');
+      if (cancelBtn) cancelBtn.onclick = async () => {
+        if (!(await confirmDialog('Cancel listing?', 'Distributors will no longer see this food.', 'Cancel Listing', 'btn-danger'))) return;
+        try { await api(`/listings/${id}/cancel`, { method: 'POST' }); toast('Listing cancelled.'); load(); }
+        catch (ex) { toast(ex.message, 'danger'); }
+      };
+    }).catch((e) => { content.innerHTML = emptyState('exclamation-circle', esc(e.message)); });
+  }
+  bindClaimActions(content, load);
+  load();
+</script>
+</body>
+</html>

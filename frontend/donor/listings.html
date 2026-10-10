@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Listings · FoodRescue</title>
+  <meta name="description" content="FoodRescue connects surplus food donors with distributors in Bangalore.">
+  <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+<div class="app-layout">
+  <aside class="app-sidebar" id="sidebar"></aside>
+  <main class="app-main">
+    <div class="page-head">
+      <h1>My Listings</h1>
+      <a href="/donor/add-listing.html" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add</a>
+    </div>
+    <ul class="nav fr-tabs gap-1 mb-3 flex-nowrap overflow-auto" id="tabs"></ul>
+    <div id="list"></div>
+  </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/app.js"></script>
+<script src="/js/layout.js"></script>
+<script src="/js/cards.js"></script>
+<script>
+  requireRole('donor');
+  renderLayout('listings');
+
+  const TABS = [
+    ['all', 'All', () => true],
+    ['active', 'Active', (l) => l.status === 'available' && !isExpired(l)],
+    ['claimed', 'Claimed', (l) => l.status === 'claimed'],
+    ['completed', 'Completed', (l) => l.status === 'completed'],
+    ['closed', 'Expired / Cancelled', (l) => isExpired(l) || ['cancelled', 'removed'].includes(l.status)],
+  ];
+  let listings = [];
+  let tab = qs('tab') || 'all';
+
+  function actions(l) {
+    const view = `<a href="/donor/listing.html?id=${l._id}" class="btn btn-sm btn-light">View</a>`;
+    if (l.status !== 'available') return view;
+    return `${view}<a href="/donor/add-listing.html?id=${l._id}" class="btn btn-sm btn-outline-primary">Edit</a>
+            <button class="btn btn-sm btn-outline-danger" data-cancel="${l._id}">Cancel</button>`;
+  }
+
+  function render() {
+    document.getElementById('tabs').innerHTML = TABS.map(([key, label, fn]) =>
+      `<li class="nav-item"><a href="#" class="nav-link text-nowrap ${key === tab ? 'active' : ''}" data-tab="${key}">${label} (${listings.filter(fn).length})</a></li>`).join('');
+    const shown = listings.filter(TABS.find((t) => t[0] === tab)[2]);
+    document.getElementById('list').innerHTML = shown.length ? shown.map((l) => listingRow(l, actions(l))).join('')
+      : emptyState('inbox', 'No listings here.');
+  }
+
+  document.getElementById('tabs').onclick = (e) => {
+    const a = e.target.closest('[data-tab]');
+    if (!a) return;
+    e.preventDefault();
+    tab = a.dataset.tab;
+    history.replaceState(null, '', '?tab=' + tab);
+    render();
+  };
+
+  document.getElementById('list').onclick = async (e) => {
+    const btn = e.target.closest('[data-cancel]');
+    if (!btn) return;
+    if (!(await confirmDialog('Cancel listing?', 'Distributors will no longer see this food. This cannot be undone.', 'Cancel Listing', 'btn-danger'))) return;
+    try {
+      await api(`/listings/${btn.dataset.cancel}/cancel`, { method: 'POST' });
+      toast('Listing cancelled.');
+      load();
+    } catch (ex) { toast(ex.message, 'danger'); }
+  };
+
+  function load() {
+    document.getElementById('list').innerHTML = loadingState();
+    api('/listings/mine').then((d) => { listings = d.listings; render(); })
+      .catch((e) => { document.getElementById('list').innerHTML = emptyState('exclamation-circle', esc(e.message)); });
+  }
+  load();
+</script>
+</body>
+</html>

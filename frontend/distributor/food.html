@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Food Details · FoodRescue</title>
+  <meta name="description" content="FoodRescue connects surplus food donors with distributors in Bangalore.">
+  <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+<div class="app-layout">
+  <aside class="app-sidebar" id="sidebar"></aside>
+  <main class="app-main">
+    <a href="/distributor/marketplace.html" class="small text-decoration-none" id="back"><i class="bi bi-arrow-left"></i> Back to food</a>
+    <div id="content" class="mt-2"></div>
+  </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/app.js"></script>
+<script src="/js/layout.js"></script>
+<script>
+  requireRole('distributor');
+  renderLayout('browse');
+  const id = qs('id');
+  const content = document.getElementById('content');
+  if (document.referrer.includes('/distributor/marketplace.html')) document.getElementById('back').onclick = (e) => { e.preventDefault(); history.back(); };
+
+  function claimBox(l) {
+    const mine = l.myClaim;
+    if (mine?.status === 'claimed') return `<div class="alert alert-success mb-3"><i class="bi bi-check-circle-fill me-1"></i>
+        <b>You claimed this food.</b> Collect it before ${fmtDate(l.pickupDeadline)}.
+        ${l.donorId.phone ? `<br>Donor phone: <a href="tel:${esc(l.donorId.phone)}">${esc(l.donorId.phone)}</a>` : ''}</div>
+        <a href="/distributor/pickups.html" class="btn btn-primary w-100 py-2">Go to My Pickups</a>`;
+    if (mine?.status === 'completed') return `<div class="alert alert-info mb-0">You collected this food. Thank you!</div>`;
+    if (l.status === 'available' && !isExpired(l)) return `<button class="btn btn-primary w-100 py-2 fs-6" id="claimBtn"><i class="bi bi-hand-thumbs-up me-1"></i>Claim This Food</button>`;
+    return `<div class="alert alert-secondary mb-0">This food is no longer available${l.status === 'claimed' ? ' (claimed by another distributor)' : ''}.</div>`;
+  }
+
+  function load() {
+    content.innerHTML = loadingState();
+    api('/listings/' + id).then(({ listing: l }) => {
+      const d = l.donorId;
+      content.innerHTML = `
+        <div class="row g-4">
+          <div class="col-lg-6">${imgTag(l.imageUrl, 'w-100 rounded-4 shadow-sm', l.title).replace('<img', '<img style="aspect-ratio:4/3;object-fit:cover"')}</div>
+          <div class="col-lg-6">
+            <div class="d-flex justify-content-between flex-wrap gap-2 align-items-start"><h1 class="h3 mb-1">${esc(l.title)}</h1>${statusBadge(l.status, l)}</div>
+            <div class="d-flex flex-wrap gap-1 mb-3">${typeBadges(l)}</div>
+            <ul class="list-unstyled mb-3">
+              <li class="mb-1"><i class="bi bi-geo-alt text-green me-2"></i>${esc(l.area)}, Bangalore</li>
+              <li class="mb-1"><i class="bi bi-people text-green me-2"></i>${l.quantityPlates} plates · <b class="${l.pricePerPlate ? 'text-orange' : 'text-green'}">${fmtPrice(l.pricePerPlate)}</b></li>
+              <li><i class="bi bi-clock text-green me-2"></i>Pickup by: ${fmtDate(l.pickupDeadline)}</li>
+            </ul>
+            <div class="fr-card p-3 mb-3 d-flex align-items-center gap-3">
+              <div class="avatar">${esc(initials(d.organizationName || d.name))}</div>
+              <div><div class="small text-muted">Posted by</div><div class="fw-semibold">${esc(d.organizationName || d.name)}</div>
+                <div>${starsHtml(l.donorRating?.avg, l.donorRating?.count)} <span class="food-meta">· ${l.donorListingCount} listing${l.donorListingCount === 1 ? '' : 's'}</span></div></div>
+            </div>
+            <h2 class="h6 fw-semibold">Description</h2>
+            <p class="text-muted">${esc(l.description) || '<i>No description</i>'}</p>
+            <div id="claimArea">${claimBox(l)}</div>
+            <div class="text-end mt-3"><a href="#" class="small text-muted" id="reportLink"><i class="bi bi-flag me-1"></i>Report this listing</a></div>
+          </div>
+        </div>`;
+
+      const btn = document.getElementById('claimBtn');
+      if (btn) btn.onclick = async () => {
+        const ok = await confirmDialog('Claim this food?',
+          `You are committing to collect <b>${l.quantityPlates} plates of ${esc(l.title)}</b> from ${esc(d.organizationName || d.name)}, ${esc(l.area)}, before <b>${fmtDate(l.pickupDeadline)}</b>.`, 'Claim Food');
+        if (!ok) return;
+        await withBusy(btn, async () => {
+          try {
+            await api('/claims', { method: 'POST', body: { listingId: l._id } });
+            toast('Claimed! The donor can see you are coming.');
+            load();
+          } catch (ex) { toast(ex.message, 'danger'); load(); }
+        });
+      };
+
+      document.getElementById('reportLink').onclick = async (e) => {
+        e.preventDefault();
+        const reason = await reportDialog();
+        if (!reason) return;
+        try { await api('/reports', { method: 'POST', body: { targetType: 'listing', targetListingId: l._id, reason } }); toast('Report sent to the admin team.'); }
+        catch (ex) { toast(ex.message, 'danger'); }
+      };
+    }).catch((e) => { content.innerHTML = emptyState('exclamation-circle', esc(e.message)); });
+  }
+
+  function reportDialog() {
+    return new Promise((resolve) => {
+      const el = document.createElement('div');
+      el.className = 'modal fade';
+      el.innerHTML = `<div class="modal-dialog modal-dialog-centered"><div class="modal-content" style="border-radius:16px">
+        <div class="modal-header border-0"><h5 class="modal-title">Report listing</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body pt-0"><label class="form-label" for="reason">What's wrong?</label>
+          <textarea id="reason" class="form-control" rows="3" maxlength="500" placeholder="e.g. food quality issue, wrong details, donor unreachable"></textarea></div>
+        <div class="modal-footer border-0"><button class="btn btn-light" data-bs-dismiss="modal">Cancel</button><button class="btn btn-danger" data-ok>Send Report</button></div></div></div>`;
+      document.body.appendChild(el);
+      const m = new bootstrap.Modal(el);
+      let out = null;
+      el.querySelector('[data-ok]').onclick = () => { out = el.querySelector('textarea').value.trim(); if (out) m.hide(); };
+      el.addEventListener('hidden.bs.modal', () => { el.remove(); resolve(out); });
+      m.show();
+    });
+  }
+  load();
+</script>
+</body>
+</html>

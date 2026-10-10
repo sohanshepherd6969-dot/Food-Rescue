@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login · FoodRescue</title>
+  <meta name="description" content="FoodRescue connects surplus food donors with distributors in Bangalore.">
+  <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+<div class="auth-wrap">
+  <div class="fr-card auth-card">
+    <div class="text-center mb-4"><a class="brand fs-3" href="/"><img src="/img/logo.svg" width="32" height="32" alt="">FoodRescue</a></div>
+    <ul class="nav nav-pills nav-fill fr-tabs bg-light rounded-3 p-1 mb-4">
+      <li class="nav-item"><a class="nav-link active" href="/login.html">Login</a></li>
+      <li class="nav-item"><a class="nav-link" href="/signup.html">Sign Up</a></li>
+    </ul>
+    <h1 class="h4 text-center mb-1">Welcome Back</h1>
+    <p class="text-center text-muted mb-4">Login to your account</p>
+    <div class="alert alert-warning py-2 small d-none" id="notice"></div>
+    <form id="loginForm" novalidate>
+      <div class="mb-3">
+        <label class="form-label" for="email">Email</label>
+        <input type="email" class="form-control" id="email" placeholder="you@example.com" required autocomplete="email">
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="password">Password</label>
+        <div class="input-group">
+          <input type="password" class="form-control" id="password" placeholder="Enter password" required autocomplete="current-password">
+          <button class="btn btn-outline-secondary" type="button" id="togglePw" aria-label="Show password"><i class="bi bi-eye"></i></button>
+        </div>
+      </div>
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="form-check"><input class="form-check-input" type="checkbox" id="remember" checked><label class="form-check-label small" for="remember">Remember me</label></div>
+        <a href="#" class="small" id="forgot">Forgot password?</a>
+      </div>
+      <div class="alert alert-danger py-2 small d-none" id="error"></div>
+      <button class="btn btn-primary w-100 py-2" type="submit">Login</button>
+    </form>
+    <p class="text-center small text-muted mt-4 mb-0">Don't have an account? <a href="/signup.html">Sign up</a></p>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/app.js"></script>
+<script>
+  // Already logged in? Go straight to the dashboard.
+  if (Auth.token && Auth.user) location.replace(qs('next') || HOME[Auth.user.role]);
+
+  const notice = document.getElementById('notice');
+  if (qs('expired')) { notice.textContent = 'Your session expired. Please log in again.'; notice.classList.remove('d-none'); }
+
+  document.getElementById('togglePw').onclick = (e) => {
+    const pw = document.getElementById('password');
+    pw.type = pw.type === 'password' ? 'text' : 'password';
+    e.currentTarget.innerHTML = `<i class="bi bi-eye${pw.type === 'password' ? '' : '-slash'}"></i>`;
+  };
+  document.getElementById('forgot').onclick = (e) => {
+    e.preventDefault();
+    toast('Password reset is handled by the FoodRescue admin. Please contact hello@foodrescue.example.', 'info');
+  };
+
+  document.getElementById('loginForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const err = document.getElementById('error');
+    err.classList.add('d-none');
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    if (!email || !password) { err.textContent = 'Enter your email and password.'; err.classList.remove('d-none'); return; }
+
+    await withBusy(e.submitter, async () => {
+      try {
+        const { token, user } = await api('/auth/login', { method: 'POST', body: { email, password } });
+        Auth.save(token, user, document.getElementById('remember').checked);
+        const next = qs('next');
+        location.href = next && next.startsWith('/') ? next : HOME[user.role];
+      } catch (ex) {
+        err.textContent = ex.message;
+        err.classList.remove('d-none');
+      }
+    });
+  };
+</script>
+</body>
+</html>

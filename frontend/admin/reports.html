@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reports · FoodRescue</title>
+  <meta name="description" content="FoodRescue connects surplus food donors with distributors in Bangalore.">
+  <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="/css/style.css" rel="stylesheet">
+</head>
+<body>
+<div class="app-layout">
+  <aside class="app-sidebar" id="sidebar"></aside>
+  <main class="app-main">
+    <div class="page-head"><div><h1>Reports &amp; Complaints</h1><p class="text-muted mb-0">Reports sent by donors and distributors.</p></div>
+      <select class="form-select w-auto" id="status"><option value="">All reports</option><option value="open">Open</option><option value="reviewed">Reviewed</option><option value="resolved">Resolved</option><option value="dismissed">Dismissed</option></select></div>
+    <div id="list"></div>
+  </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/app.js"></script>
+<script src="/js/layout.js"></script>
+<script>
+  requireRole('admin');
+  renderLayout('reports');
+  const sel = document.getElementById('status');
+  const list = document.getElementById('list');
+  sel.value = qs('status') || '';
+
+  function card(r) {
+    const target = r.targetType === 'listing'
+      ? `Listing: <b>${esc(r.targetListingId?.title || '(deleted)')}</b> ${r.targetListingId ? statusBadge(r.targetListingId.status) : ''}`
+      : '';
+    const user = r.targetUserId ? `User: <b>${esc(r.targetUserId.name)}</b> (${esc(r.targetUserId.role)}) ${statusBadge(r.targetUserId.status)}` : '';
+    return `<div class="fr-card p-3 mb-3" data-id="${r._id}">
+      <div class="d-flex justify-content-between flex-wrap gap-2 mb-2">
+        <div class="small text-muted">From <b>${esc(r.reporterId?.name || '')}</b> (${esc(r.reporterId?.role || '')}) · ${fmtDate(r.createdAt)}</div>${statusBadge(r.status)}</div>
+      <p class="mb-2">“${esc(r.reason)}”</p>
+      <div class="small mb-3">${target}${target && user ? ' · ' : ''}${user}</div>
+      <div class="row g-2 align-items-end">
+        <div class="col-md-3"><label class="form-label small mb-1">Status</label><select class="form-select form-select-sm" data-field="status">
+          ${['open', 'reviewed', 'resolved', 'dismissed'].map((s) => `<option value="${s}" ${s === r.status ? 'selected' : ''} class="text-capitalize">${s[0].toUpperCase() + s.slice(1)}</option>`).join('')}</select></div>
+        <div class="col-md-6"><label class="form-label small mb-1">Admin notes</label><input class="form-control form-control-sm" data-field="notes" value="${esc(r.adminNotes)}" maxlength="1000"></div>
+        <div class="col-md-3 d-flex gap-1 flex-wrap">
+          <button class="btn btn-sm btn-primary" data-act="save">Save</button>
+          ${r.targetListingId && ['available', 'claimed'].includes(r.targetListingId.status) ? `<button class="btn btn-sm btn-outline-danger" data-act="remove" data-listing="${r.targetListingId._id}">Remove listing</button>` : ''}
+          ${r.targetUserId && r.targetUserId.status === 'active' && r.targetUserId.role !== 'admin' ? `<button class="btn btn-sm btn-outline-danger" data-act="suspend" data-user="${r.targetUserId._id}">Suspend user</button>` : ''}
+        </div>
+      </div></div>`;
+  }
+
+  async function load() {
+    history.replaceState(null, '', sel.value ? '?status=' + sel.value : location.pathname);
+    list.innerHTML = loadingState();
+    try {
+      const { reports } = await api('/admin/reports' + (sel.value ? '?status=' + sel.value : ''));
+      list.innerHTML = reports.length ? reports.map(card).join('') : emptyState('flag', 'No reports.');
+    } catch (e) { list.innerHTML = emptyState('exclamation-circle', esc(e.message)); }
+  }
+
+  list.onclick = async (e) => {
+    const b = e.target.closest('[data-act]');
+    if (!b) return;
+    const box = b.closest('[data-id]');
+    try {
+      if (b.dataset.act === 'save') {
+        await api('/admin/reports/' + box.dataset.id, { method: 'PATCH', body: { status: box.querySelector('[data-field=status]').value, adminNotes: box.querySelector('[data-field=notes]').value } });
+        toast('Report updated.');
+      } else if (b.dataset.act === 'remove') {
+        if (!(await confirmDialog('Remove listing?', 'It disappears from the marketplace.', 'Remove', 'btn-danger'))) return;
+        await api(`/admin/listings/${b.dataset.listing}/remove`, { method: 'POST' });
+        toast('Listing removed.');
+      } else if (b.dataset.act === 'suspend') {
+        if (!(await confirmDialog('Suspend user?', 'They will not be able to log in.', 'Suspend', 'btn-danger'))) return;
+        await api(`/admin/users/${b.dataset.user}/status`, { method: 'PATCH', body: { status: 'suspended' } });
+        toast('User suspended.');
+      }
+      load();
+    } catch (ex) { toast(ex.message, 'danger'); }
+  };
+  sel.onchange = load;
+  load();
+</script>
+</body>
+</html>
