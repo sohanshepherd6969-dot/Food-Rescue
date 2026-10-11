@@ -16,11 +16,13 @@ const app = express();
 
 // CORS: allow the deployed frontend (CLIENT_ORIGIN, comma-separated) and local dev.
 const allowed = (process.env.CLIENT_ORIGIN || '').split(',').map((s) => s.trim()).filter(Boolean);
-app.use(cors({
-  origin: (origin, cb) => {
-    if (!origin || allowed.includes(origin) || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) return cb(null, true);
-    cb(new Error('Not allowed by CORS: ' + origin));
-  },
+app.use(cors((req, cb) => {
+  const origin = req.headers.origin;
+  // Same-origin: pages served by this server (browsers still send Origin on POST).
+  const self = origin && origin.replace(/^https?:\/\//, '') === req.headers.host;
+  const ok = !origin || self || allowed.includes(origin) || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+  if (ok) return cb(null, { origin: true });
+  cb(new Error('Not allowed by CORS: ' + origin));
 }));
 app.use(express.json({ limit: '1mb' }));
 
